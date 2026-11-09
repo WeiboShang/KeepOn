@@ -1,15 +1,55 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.kdbx
+id_rsa
+id_ed25519
+.netrc
+.npmrc
+.pypirc
+secrets.json
+credentials.json
+.aws/
+.ssh/
+
+# Agent data and private workspaces
 .keepon/
 .koreagent-next/
-/.trae/
 /backend/workspace/
-backend/.venv/
-backend/.env
+/.trae/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.log
+
+# Python environments, bytecode and test output
+.venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
-desktop/node_modules/
-desktop/dist/
-desktop/dist-electron/
-native/macos-computer-helper/.build/
-*.log
+.coverage
+.coverage.*
+htmlcov/
+
+# JavaScript and Swift build output
+node_modules/
+/desktop/dist/
+/desktop/dist-electron/
+*.tsbuildinfo
+/native/macos-computer-helper/.build/
+/native/macos-computer-helper/.swiftpm/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

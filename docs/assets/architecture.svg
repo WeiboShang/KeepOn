@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 482" width="1100" height="482" role="img" aria-labelledby="title desc">
+  <title id="title">KeepOn architecture</title>
+  <desc id="desc">An Electron desktop communicates with a local Python Host. The Host calls the configured model provider and manages local workspace files, SQLite data and artifacts.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0 0 9 4.5 0 9Z" fill="#7dd3fc"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="1098" height="480" rx="28" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+  <g font-family="Segoe UI, system-ui, sans-serif">
+    <text x="48" y="59" fill="#7dd3fc" font-size="15" font-weight="700" letter-spacing="2.2">KEEPON</text>
+    <text x="48" y="106" fill="#f8fafc" font-size="35" font-weight="700">A local desktop agent workspace</text>
+    <text x="48" y="139" fill="#cbd5e1" font-size="18">Run tasks, review actions and inspect the files your agent delivers.</text>
+
+    <g fill="none" stroke="#7dd3fc" stroke-width="2.5" marker-end="url(#arrow)">
+      <path d="M336 235H405"/>
+      <path d="M693 235H762"/>
+      <path d="M550 295V344"/>
+    </g>
+
+    <g stroke-width="1.5">
+      <rect x="48" y="176" width="288" height="119" rx="16" fill="#17283d" stroke="#42607d"/>
+      <rect x="406" y="176" width="288" height="119" rx="16" fill="#123248" stroke="#38bdf8"/>
+      <rect x="764" y="176" width="288" height="119" rx="16" fill="#17283d" stroke="#42607d"/>
+      <rect x="406" y="346" width="288" height="93" rx="16" fill="#17283d" stroke="#42607d"/>
+    </g>
+
+    <g fill="#bae6fd" font-size="13" font-weight="700" letter-spacing="1.3">
+      <text x="68" y="205">USER INTERFACE</text>
+      <text x="426" y="205">LOCAL RUNTIME</text>
+      <text x="784" y="205">MODEL API</text>
+    </g>
+    <g fill="#f8fafc" font-size="24" font-weight="700">
+      <text x="68" y="241">Electron desktop</text>
+      <text x="426" y="241">Python Host</text>
+      <text x="784" y="241">Model provider</text>
+      <text x="426" y="384">Local storage</text>
+    </g>
+    <g fill="#dbeafe" font-size="15">
+      <text x="68" y="269">Chat, approvals and run history</text>
+      <text x="426" y="269">Agent loop, tools and scheduling</text>
+      <text x="784" y="269">OpenAI, DeepSeek, Qwen, Anthropic</text>
+      <text x="426" y="413">SQLite, workspace files and artifacts</text>
+    </g>
+  </g>
+</svg>

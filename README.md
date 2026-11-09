@@ -1,81 +1,80 @@
 # KeepOn
 
-KeepOn 是一套从零实现的本地 AI Agent Harness。它提供 Electron 桌面工作区、Python Host、JSON-RPC 通信、长期运行管理、审批、自动化、交付物、记忆、扩展能力，以及 macOS Computer Helper。
+**在桌面上运行、审批和追踪 AI Agent 任务。**
+
+KeepOn 是一个本地运行的 AI Agent 工作台。你可以把多步任务交给 Agent，在桌面端审批敏感操作，并在任务完成后查看运行记录和交付文件。桌面端使用 Electron，任务和工具由 Python Host 管理。使用云端模型时，Host 会向你配置的模型服务发送请求。
+
+[快速开始](#快速开始) · [首次使用](#首次使用) · [开发与验证](#开发与验证) · [反馈问题](https://github.com/WeiboShang/KeepOn/issues)
+
+![KeepOn 架构图，展示 Electron 桌面端、Python Host、模型服务和本地工作区](docs/assets/architecture.svg)
 
 ## 功能
 
-- 对话与多步工具执行，支持流式回答、推理片段、工具状态、普通模式和无副作用计划模式
-- 每个模型步骤的上下文预算检查、长工具结果压缩、滚动摘要，以及核心记忆/任务/Skill 上下文注入
-- Run 生命周期、检查点、中断、恢复、用量统计、证据存档与完整 Trace；可按需查看持久化的模型输入和工具声明
-- 敏感工具操作审批，电脑操作提供独立置顶审批窗口
-- 一次性、间隔与 Cron 自动化
-- 文件与 URL 交付物发布、预览和下载
-- 长期记忆、核心记忆、运行后反思、容量维护、跨会话消息搜索，以及带步骤的持续任务
-- Skill 安装、启停、删除、扩展预览导入和“重复成功任务 → 待审核 Skill 候选”学习闭环
-- MCP Server 配置、启停、环境变量白名单、工作区约束和 macOS Seatbelt 策略；不支持隔离的平台默认拒绝启动需沙箱的进程
-- OpenAI、DeepSeek、Qwen 和 Anthropic 模型配置
-- macOS 应用观察、截图、可访问性元素树、元素引用点击、输入、按键、滚动、应用/窗口聚焦
-- Computer Run 独占租约、Session 校验与过期 Observation 拒绝机制
+- **执行和追踪任务**。支持流式对话、计划模式、工具调用、运行检查点、中断恢复和用量统计。
+- **审批和验收**。审阅敏感工具调用，为任务定义验收条件，检查交付文件与结构化结果，并按需人工签收。
+- **自动化和交付**。支持一次性、间隔和 Cron 调度。可在桌面端预览或下载 Agent 发布的文件。
+- **扩展和知识管理**。支持 Skill、MCP、跨会话搜索、项目 Wiki 和长期记忆。候选知识经过审核后才会进入模型上下文。
+- **桌面操作**。macOS Helper 支持观察应用、截图、点击、输入和滚动。启用时需要相应的系统权限。
 
-## 知识与任务约束
+## 快速开始
 
-- Agent 写入的长期记忆、运行后反思和重复成功任务提取的 Skill 均先生成候选。设置页提供来源、适用范围、敏感信息和提示词注入检查清单；人工确认前，候选不会进入模型上下文。升级前已有的未审核记忆会转为候选，原内容保留。
-- 项目 Wiki 记录带来源的项目事实和历史经验。文件来源必须位于 Agent 工作区且文件存在，Run 来源必须能找到对应记录。Wiki 只向模型展示已审核条目的索引，正文通过 `wiki_read` 按需读取。
-- Wiki、记忆和 Skill 可以隔离；隔离后不再进入后续 Run 的上下文。Wiki 与记忆的修订会保留旧版并建立替代关系；Skill 安装会保存版本，可在设置页恢复为一个新版本。自动敏感信息与提示词注入检查只覆盖明显模式，仍需人工核查事实和上下文。
-- Task Spec 记录目标、约束和验收条件。Run 开始时绑定一个 Spec 版本；Agent 的 `task_update` 不能改动这些字段，用户可在设置页创建新版本。已有 Run 保持原版本，后续 Run 绑定最新版本。
-- 在「设置 → 知识治理 → 任务 Spec」启用交付验收后，从对话任务卡选择「执行并验收」。运行记录会展示文件存在、已发布 JSON 结构、交付物发布和人工签收的逐项结果。所有检查通过后任务标记为完成。
+### Windows 桌面端
 
-Host 暴露 `GET /health`、`WS /rpc`、截图读取和 artifact 下载接口。业务操作均通过 JSON-RPC 完成。
-
-## 源码导读
-
-代码中的关键决策点已加中文注释。建议按下面的顺序阅读：
-
-1. `backend/keepon/application.py`：Run 主循环、事件、审批、中断与恢复。
-2. `backend/keepon/agent.py` 和 `context.py`：模型调用、工具执行与上下文预算。
-3. `backend/keepon/database.py`、`checkpoint.py` 和 `runtime_policy.py`：持久化、检查点与运行边界。
-4. `backend/keepon/memory.py`、`wiki.py`、`tasks.py` 和 `skill_learning.py`：长期知识、任务规格与 Skill 候选审核。
-5. `backend/keepon/permissions.py`、`sandbox.py` 和 `computer.py`：敏感工具授权、子进程隔离与桌面控制。
-6. `desktop/src/rpc.ts`、`liveState.ts` 和 `App.tsx`：桌面端通信、流式状态和页面入口。
-
-注释重点解释数据流、状态转换和安全边界；具体参数与返回值以代码和类型定义为准。
-
-## Windows 开发启动
-
-需要 Python 3.11+、Node.js 20+ 和 npm。在 PowerShell 中执行：
+准备 Git、Python 3.12（安装时启用 `py` 启动器）以及 Node.js 20 或更新版本（含 npm）。在 PowerShell 中运行：
 
 ```powershell
-Set-ExecutionPolicy -Scope Process Bypass
+git clone https://github.com/WeiboShang/KeepOn.git
+cd KeepOn
 .\scripts\start.ps1
 ```
 
-也可以分别启动：
+首次运行会安装依赖并从 `backend/.env.example` 生成本地配置。脚本会一起启动桌面端和 Host，并为验收操作生成本次会话的临时凭据。如果 PowerShell 阻止本地脚本，可在当前窗口执行 `Set-ExecutionPolicy -Scope Process Bypass` 后重试。
 
-```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\python -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python -m keepon.server
+### 首次使用
 
-cd ..\desktop
-npm install
-npm run electron:dev
-```
+1. 打开桌面端的「设置」，选择 OpenAI、DeepSeek、Qwen 或 Anthropic，填写模型和 API 密钥，再测试连接。
+2. 新建对话，输入一个小任务，例如「列出工作目录里的文件，并把清单保存为 Markdown」。
+3. 在界面中处理审批，然后到「运行记录」查看执行过程，或到「交付物」打开已发布文件。
 
-首次运行在 `backend/.keepon` 创建数据库、设置、记忆、技能和交付物目录。
-
-启动脚本会为桌面与 Host 配置临时验收凭据。分开启动时，须在两个进程的环境中设置同一个至少 32 字节的随机 `KEEPON_ACCEPTANCE_TOKEN`。使用自定义端口时同时给两个进程设置 `KEEPON_PORT`，并让桌面端的 `VITE_RPC_URL` 指向同一 Host。
-
-如果 `backend/.env` 不存在，启动脚本会从 `.env.example` 创建一个空白文件，不会覆盖已有配置。Qwen 可在应用“设置”页面直接配置，也可以填写：
+也可在本地 `backend/.env` 配置模型。以下以 Qwen 为例：
 
 ```dotenv
 KEEPON_PROVIDER=qwen
 KEEPON_MODEL=qwen-plus
-KEEPON_API_KEY=sk-你的密钥
+KEEPON_API_KEY=
 KEEPON_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 ```
 
-## macOS Computer Helper
+在本地填入自己的密钥。仓库中的 [配置模板](backend/.env.example) 列出了常用变量。
+
+## 数据与平台支持
+
+- 新安装的运行数据默认位于 `backend/.keepon/`，包括数据库、设置和交付物。Agent 工作目录是 `backend/workspace/`。可用 `KEEPON_DATA_DIR` 和 `KEEPON_WORKSPACE_DIR` 覆盖。
+- 用户级 Skill 默认位于 `~/.keepon/skills/`，可用 `KEEPON_USER_SKILLS_DIR` 覆盖。旧版用户升级时请将环境变量改用 `KEEPON_` 前缀。新版默认目录尚未建立时，会继续读取原目录中的旧数据。
+- 模型密钥可放在本地 `.env`，也可由桌面应用交给 macOS Keychain 或 Windows DPAPI 保护。真实配置、数据库、工作文件和构建产物均在 [.gitignore](.gitignore) 中排除。
+- 电脑操作仅由 macOS Helper 提供。在缺少工作区隔离的平台上，要求隔离的 Shell 或 MCP 进程会被拒绝启动。仅在信任 MCP Server 时才考虑显式授权宿主机访问。
+- 搜索默认使用 DuckDuckGo。配置 `KEEPON_TAVILY_API_KEY` 后，自动模式优先使用 Tavily。HTTP 工具默认拦截私网访问。
+
+## 开发与验证
+
+Host 默认监听 `127.0.0.1:8765`，提供 `GET /health`、`WS /rpc`、截图读取和交付物下载。建议用启动脚本联调。如果分别启动 Host 和桌面端，两个进程须共享同一个至少 32 字节的随机 `KEEPON_ACCEPTANCE_TOKEN` 才能执行受保护的验收操作。自定义端口时，给两个进程设置相同的 `KEEPON_PORT`，并同步更新桌面端的 `VITE_RPC_URL`。
+
+在项目根目录执行：
+
+```powershell
+cd backend
+.\.venv\Scripts\python -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python -m pytest
+.\.venv\Scripts\ruff check .
+
+cd ..\desktop
+npm test
+npm run build
+```
+
+### macOS Computer Helper
+
+在 macOS 上安装 Swift 工具链，再从项目根目录构建并测试：
 
 ```bash
 cd native/macos-computer-helper
@@ -83,28 +82,16 @@ swift build -c release
 swift test
 ```
 
-启用前设置 `KEEPON_COMPUTER_ENABLED=true`，并在系统设置中授予辅助功能与屏幕录制权限。
+在 Host 环境中设置 `KEEPON_COMPUTER_ENABLED=true`，并在 macOS 系统设置中授予辅助功能和屏幕录制权限。
 
-Computer Helper 当前仅在 macOS 上可用。Windows 没有可靠工作区沙箱时，Shell 和默认 MCP 配置会拒绝启动；如确需运行 MCP，须明确将文件系统设为 `host`、网络设为 `allowed`，每次工具调用仍需审批。宿主机模式不提供隔离，切勿运行不可信 Server。
+## 源码导读
 
-搜索默认使用 DuckDuckGo；设置 `KEEPON_TAVILY_API_KEY` 后，`KEEPON_SEARCH_PROVIDER=auto` 优先使用 Tavily，遇到可恢复错误时回退。可显式选择 `tavily` 或 `duckduckgo`。HTTP 工具默认拒绝私网地址及重定向到私网的目标；只有明确设置 `KEEPON_HTTP_ALLOW_PRIVATE_NETWORK=true` 才放行。用户级 Skill 默认保存在 `~/.keepon/skills`，可通过 `KEEPON_USER_SKILLS_DIR` 指定。
+| 路径 | 职责 |
+| --- | --- |
+| [`backend/keepon`](backend/keepon) | Host、Agent 循环、工具、审批、持久化 |
+| [`desktop/src`](desktop/src) | 桌面工作台、运行记录、设置和验收 |
+| [`desktop/electron`](desktop/electron) | 桌面窗口、通知和受保护的本地调用 |
+| [`native/macos-computer-helper`](native/macos-computer-helper) | macOS 应用观察和电脑操作 |
+| [交付验收设计](docs/delivery-acceptance-design.md) | 任务规则、验收状态和权限边界 |
 
-## 验证
-
-```powershell
-cd backend
-python -m pytest
-ruff check .
-python -m compileall -q keepon
-
-cd ..\desktop
-npm test
-npm run typecheck
-npm run build
-```
-
-## 数据隔离
-
-默认运行数据位于 `backend/.keepon`，工作文件位于 `backend/workspace`。可通过 `KEEPON_DATA_DIR` 和 `KEEPON_WORKSPACE_DIR` 覆盖。数据库升级前自动生成 `backup-v*` 快照并记录版本；旧的字段匹配授权规则保留但停用，需要重新审批。所有配置均使用 `KEEPON_` 前缀。从旧版升级时，请将已有环境变量改用该前缀。若新版默认数据目录尚未建立，已有旧版数据会继续从原目录读取。
-
-模型密钥不会进入数据库导出或日志。桌面端保存密钥时使用独立的 KeepOn 密钥命名空间；`.env`、数据库、虚拟环境、依赖与构建目录均被 Git 忽略。
+遇到问题时，可以在 [GitHub Issues](https://github.com/WeiboShang/KeepOn/issues) 提交复现步骤、操作系统版本和经过脱敏的错误信息。
