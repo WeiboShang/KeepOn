@@ -111,7 +111,7 @@ function Chat({initialConversationId,requestedMode,onOpenRun,repairDraft,consume
 }){
   const confirmAction=useConfirmAction()
   const qc=useQueryClient();const [selected,setSelected]=useState('');const [input,setInput]=useState('');const [mode,setMode]=useState<'normal'|'plan'>('normal');const [live,setLive]=useState<LiveRunState|null>(null);const [planTaskId,setPlanTaskId]=useState<string|null>(null);const [drawer,setDrawer]=useState(false);const [renaming,setRenaming]=useState(false)
-  const [pinned,setPinned]=useState<string[]>(()=>JSON.parse(localStorage.getItem('keepon:pinned-conversations') ?? localStorage.getItem('koreagent:pinned-conversations') ?? '[]'))
+  const [pinned,setPinned]=useState<string[]>(()=>JSON.parse(localStorage.getItem('keepon:pinned-conversations') ?? '[]'))
   const [taskSelection,setTaskSelection]=useState('')
   const [acceptanceTarget,setAcceptanceTarget]=useState<AcceptanceTarget|null>(null)
   useEffect(()=>{if(initialConversationId)setSelected(initialConversationId)},[initialConversationId])

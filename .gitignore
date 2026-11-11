@@ -20,7 +20,7 @@ credentials.json
 
 # Agent data and private workspaces
 .keepon/
-.koreagent-next/
+/backend/.*/
 /backend/workspace/
 /.trae/
 *.db

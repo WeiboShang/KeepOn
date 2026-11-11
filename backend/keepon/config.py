@@ -10,10 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
 
-def _existing_path(current: Path, legacy: Path) -> Path:
-    return legacy if not current.exists() and legacy.exists() else current
-
-
 def _path(name: str, default: Path) -> Path:
     raw = os.getenv(name, "").strip()
     return Path(raw).expanduser().resolve() if raw else default.resolve()
@@ -32,12 +28,9 @@ class Settings:
     http_allow_private_network: bool = os.getenv("KEEPON_HTTP_ALLOW_PRIVATE_NETWORK", "false").lower() == "true"
     host: str = os.getenv("KEEPON_HOST", "127.0.0.1")
     port: int = int(os.getenv("KEEPON_PORT", "8765"))
-    # 旧数据库保存交付物的绝对路径，因此在原目录继续使用已有数据。
-    data_dir: Path = _path("KEEPON_DATA_DIR", _existing_path(ROOT / ".keepon", ROOT / ".koreagent-next"))
-    user_skills_dir: Path = _path(
-        "KEEPON_USER_SKILLS_DIR",
-        _existing_path(Path.home() / ".keepon" / "skills", Path.home() / ".koreagent-next" / "skills"),
-    )
+    data_dir: Path = _path("KEEPON_DATA_DIR", ROOT / ".keepon")
+    database_name: str = os.getenv("KEEPON_DATABASE_NAME", "").strip() or "keepon.db"
+    user_skills_dir: Path = _path("KEEPON_USER_SKILLS_DIR", Path.home() / ".keepon" / "skills")
     workspace_dir: Path = _path("KEEPON_WORKSPACE_DIR", ROOT / "workspace")
     computer_enabled: bool = os.getenv("KEEPON_COMPUTER_ENABLED", "false").lower() == "true"
     max_steps: int = int(os.getenv("KEEPON_MAX_STEPS", "12"))
@@ -50,7 +43,10 @@ class Settings:
 
     @property
     def database(self) -> Path:
-        return _existing_path(self.data_dir / "keepon.db", self.data_dir / "koreagent-next.db")
+        name = Path(self.database_name)
+        if name.name != self.database_name or name.suffix != ".db":
+            raise ValueError("KEEPON_DATABASE_NAME must be a .db filename")
+        return self.data_dir / name
 
     def ensure_dirs(self) -> None:
         for path in (

@@ -12,7 +12,7 @@ from ctypes import wintypes
 from pathlib import Path
 
 SERVICE = "com.keepon.desktop.model-api-key"
-LEGACY_SERVICE = "com.koreagent-next.desktop.model-api-key"
+LEGACY_SERVICE = os.getenv("KEEPON_LEGACY_CREDENTIAL_SERVICE", "").strip()
 
 
 class SecretStore:
@@ -43,7 +43,8 @@ class SecretStore:
         if env:
             return env
         if sys.platform == "darwin":
-            for service in (SERVICE, LEGACY_SERVICE):
+            services = (SERVICE, LEGACY_SERVICE) if LEGACY_SERVICE else (SERVICE,)
+            for service in services:
                 result = subprocess.run(
                     ["/usr/bin/security", "find-generic-password", "-s", service, "-a", provider, "-w"],
                     capture_output=True,
@@ -110,7 +111,8 @@ class SecretStore:
         try:
             return SecretStore._crypt_unprotect(encrypted, SERVICE).decode("utf-8")
         except OSError:
-            # 旧凭据使用旧服务标识作为 DPAPI 加密参数。
+            if not LEGACY_SERVICE:
+                raise
             return SecretStore._crypt_unprotect(encrypted, LEGACY_SERVICE).decode("utf-8")
 
     @staticmethod

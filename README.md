@@ -50,7 +50,7 @@ KEEPON_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 ## 数据与平台支持
 
 - 新安装的运行数据默认位于 `backend/.keepon/`，包括数据库、设置和交付物。Agent 工作目录是 `backend/workspace/`。可用 `KEEPON_DATA_DIR` 和 `KEEPON_WORKSPACE_DIR` 覆盖。
-- 用户级 Skill 默认位于 `~/.keepon/skills/`，可用 `KEEPON_USER_SKILLS_DIR` 覆盖。旧版用户升级时请将环境变量改用 `KEEPON_` 前缀。新版默认目录尚未建立时，会继续读取原目录中的旧数据。
+- 用户级 Skill 默认位于 `~/.keepon/skills/`，可用 `KEEPON_USER_SKILLS_DIR` 覆盖。旧版用户升级时请将环境变量改用 `KEEPON_` 前缀。保留旧数据时，将 `KEEPON_DATA_DIR` 指向原目录，并按需设置 `KEEPON_DATABASE_NAME`（数据库文件名）和 `KEEPON_LEGACY_CREDENTIAL_SERVICE`（原凭据服务标识）。
 - 模型密钥可放在本地 `.env`，也可由桌面应用交给 macOS Keychain 或 Windows DPAPI 保护。真实配置、数据库、工作文件和构建产物均在 [.gitignore](.gitignore) 中排除。
 - 电脑操作仅由 macOS Helper 提供。在缺少工作区隔离的平台上，要求隔离的 Shell 或 MCP 进程会被拒绝启动。仅在信任 MCP Server 时才考虑显式授权宿主机访问。
 - 搜索默认使用 DuckDuckGo。配置 `KEEPON_TAVILY_API_KEY` 后，自动模式优先使用 Tavily。HTTP 工具默认拦截私网访问。

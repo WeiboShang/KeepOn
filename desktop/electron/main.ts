@@ -1,13 +1,8 @@
 import { app, BrowserWindow, Notification, ipcMain, shell } from 'electron'
-import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 app.setName('KeepOn')
-const legacyProfile = path.join(app.getPath('appData'), 'KoreAgent Next')
-if (!existsSync(app.getPath('userData')) && existsSync(legacyProfile)) {
-  app.setPath('userData', legacyProfile)
-}
 let approvalWindow: BrowserWindow | null = null
 let mainWindow: BrowserWindow | null = null
 const acceptanceToken = process.env.KEEPON_ACCEPTANCE_TOKEN
